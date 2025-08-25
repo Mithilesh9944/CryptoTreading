@@ -14,12 +14,23 @@ import java.net.http.HttpRequest;
 
 @Configuration
 public class AppConfig {
+    private static String[] PUBLIC_URL = {
+            "/v3/api-docs/**",
+            "/v2/api-docs",
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/webjars/**"
+    };
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf->csrf.disable())
                 .sessionManagement(management->management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(Authorize->Authorize.requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll())
+                .authorizeHttpRequests(
+                        Authorize->Authorize.requestMatchers(PUBLIC_URL).permitAll()
+                                .requestMatchers("/api/**").authenticated()
+                                .anyRequest().permitAll()
+                )
                 .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
                 .cors(cors->cors.configurationSource(corsConfigurationSource()));
         return http.build();
